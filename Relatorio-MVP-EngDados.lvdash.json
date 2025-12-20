@@ -1,0 +1,1718 @@
+{
+  "datasets": [
+    {
+      "name": "4c79c440",
+      "displayName": "GP1",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  l.uf,\r\n",
+        "  SUM(f.ead_soma) AS ead_total\r\n",
+        "FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "JOIN puc.gold.dim_localizacao l\r\n",
+        "  ON l.sk_localizacao = f.sk_localizacao\r\n",
+        "JOIN ult_mes u\r\n",
+        "  ON f.dt_mes = u.dt_mes\r\n",
+        "GROUP BY l.uf\r\n",
+        "ORDER BY ead_total DESC;"
+      ]
+    },
+    {
+      "name": "d0a7471d",
+      "displayName": "GP2",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  l.regiao,\r\n",
+        "  SUM(f.ead_soma) AS ead_total\r\n",
+        "FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "JOIN puc.gold.dim_localizacao l\r\n",
+        "  ON l.sk_localizacao = f.sk_localizacao\r\n",
+        "JOIN ult_mes u\r\n",
+        "  ON f.dt_mes = u.dt_mes\r\n",
+        "GROUP BY l.regiao\r\n",
+        "ORDER BY ead_total DESC;"
+      ]
+    },
+    {
+      "name": "0ea0c38b",
+      "displayName": "GP6",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  l.uf,\r\n",
+        "  SUM(f.perda_esperada_soma) AS perda_esperada_total\r\n",
+        "FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "JOIN puc.gold.dim_localizacao l\r\n",
+        "  ON l.sk_localizacao = f.sk_localizacao\r\n",
+        "JOIN ult_mes u\r\n",
+        "  ON f.dt_mes = u.dt_mes\r\n",
+        "GROUP BY l.uf\r\n",
+        "ORDER BY perda_esperada_total DESC;\r\n"
+      ]
+    },
+    {
+      "name": "6cef36a9",
+      "displayName": "GP7",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        "),\r\n",
+        "agg AS (\r\n",
+        "  SELECT\r\n",
+        "    l.uf,\r\n",
+        "    SUM(f.valor_recuperado_soma) AS valor_recuperado,\r\n",
+        "    SUM(f.perda_esperada_soma) AS perda_esperada\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "  JOIN puc.gold.dim_localizacao l\r\n",
+        "    ON l.sk_localizacao = f.sk_localizacao\r\n",
+        "  JOIN ult_mes u\r\n",
+        "    ON f.dt_mes = u.dt_mes\r\n",
+        "  GROUP BY l.uf\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  uf,\r\n",
+        "  valor_recuperado,\r\n",
+        "  perda_esperada,\r\n",
+        "  valor_recuperado / NULLIF(perda_esperada, 0) AS taxa_recuperacao_proxy\r\n",
+        "FROM agg\r\n",
+        "ORDER BY taxa_recuperacao_proxy DESC;\r\n"
+      ]
+    },
+    {
+      "name": "5ed47ebf",
+      "displayName": "GP8",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_fim\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        "),\r\n",
+        "base AS (\r\n",
+        "  SELECT *\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        "  WHERE dt_mes >= add_months((SELECT dt_fim FROM ult_mes), -11)\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  date_trunc('month', b.dt_mes) AS dt_mes,\r\n",
+        "  l.uf,\r\n",
+        "  SUM(b.ead_soma) AS ead_total\r\n",
+        "FROM base b\r\n",
+        "JOIN puc.gold.dim_localizacao l\r\n",
+        "  ON l.sk_localizacao = b.sk_localizacao\r\n",
+        "GROUP BY date_trunc('month', b.dt_mes), l.uf\r\n",
+        "ORDER BY dt_mes, ead_total DESC;\r\n"
+      ]
+    },
+    {
+      "name": "36e50512",
+      "displayName": "GP9",
+      "queryLines": [
+        "WITH meses AS (\r\n",
+        "  SELECT\r\n",
+        "    max(dt_mes) AS dt_atual,\r\n",
+        "    add_months(max(dt_mes), -1) AS dt_anterior\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        "),\r\n",
+        "agg AS (\r\n",
+        "  SELECT\r\n",
+        "    l.uf,\r\n",
+        "    f.dt_mes,\r\n",
+        "    SUM(f.ead_soma) AS ead_total\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "  JOIN puc.gold.dim_localizacao l\r\n",
+        "    ON l.sk_localizacao = f.sk_localizacao\r\n",
+        "  JOIN meses m\r\n",
+        "    ON f.dt_mes IN (m.dt_atual, m.dt_anterior)\r\n",
+        "  GROUP BY l.uf, f.dt_mes\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  uf,\r\n",
+        "  MAX(CASE WHEN dt_mes = (SELECT dt_atual FROM meses) THEN ead_total END) AS ead_atual,\r\n",
+        "  MAX(CASE WHEN dt_mes = (SELECT dt_anterior FROM meses) THEN ead_total END) AS ead_anterior,\r\n",
+        "  (MAX(CASE WHEN dt_mes = (SELECT dt_atual FROM meses) THEN ead_total END)\r\n",
+        "   - MAX(CASE WHEN dt_mes = (SELECT dt_anterior FROM meses) THEN ead_total END)) AS delta_ead,\r\n",
+        "  (MAX(CASE WHEN dt_mes = (SELECT dt_atual FROM meses) THEN ead_total END)\r\n",
+        "   / NULLIF(MAX(CASE WHEN dt_mes = (SELECT dt_anterior FROM meses) THEN ead_total END), 0) - 1) AS pct_var_ead\r\n",
+        "FROM agg\r\n",
+        "GROUP BY uf\r\n",
+        "ORDER BY pct_var_ead DESC;\r\n"
+      ]
+    },
+    {
+      "name": "69e7c95b",
+      "displayName": "GP10",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        "),\r\n",
+        "uf_ead AS (\r\n",
+        "  SELECT\r\n",
+        "    l.uf,\r\n",
+        "    SUM(f.ead_soma) AS ead_total\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "  JOIN puc.gold.dim_localizacao l\r\n",
+        "    ON l.sk_localizacao = f.sk_localizacao\r\n",
+        "  JOIN ult_mes u\r\n",
+        "    ON f.dt_mes = u.dt_mes\r\n",
+        "  GROUP BY l.uf\r\n",
+        "),\r\n",
+        "ord AS (\r\n",
+        "  SELECT\r\n",
+        "    uf,\r\n",
+        "    ead_total,\r\n",
+        "    SUM(ead_total) OVER () AS ead_geral,\r\n",
+        "    SUM(ead_total) OVER (ORDER BY ead_total DESC) AS ead_acumulado\r\n",
+        "  FROM uf_ead\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  uf,\r\n",
+        "  ead_total,\r\n",
+        "  ead_acumulado / ead_geral AS pct_acumulado\r\n",
+        "FROM ord\r\n",
+        "WHERE (ead_acumulado / ead_geral) <= 0.80\r\n",
+        "ORDER BY ead_total DESC;\r\n"
+      ]
+    },
+    {
+      "name": "68c04c64",
+      "displayName": "CP1",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  CASE\r\n",
+        "    WHEN c.tempo_conta_anos < 1 THEN '<1 ano'\r\n",
+        "    WHEN c.tempo_conta_anos BETWEEN 1 AND 3 THEN '1-3 anos'\r\n",
+        "    WHEN c.tempo_conta_anos BETWEEN 4 AND 7 THEN '4-7 anos'\r\n",
+        "    WHEN c.tempo_conta_anos BETWEEN 8 AND 15 THEN '8-15 anos'\r\n",
+        "    ELSE '15+ anos'\r\n",
+        "  END AS faixa_tempo_conta,\r\n",
+        "  SUM(f.ead_soma) AS ead_total,\r\n",
+        "  SUM(f.pd_true_media * f.ead_soma) / NULLIF(SUM(f.ead_soma), 0) AS pd_true_pond\r\n",
+        "FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "JOIN puc.gold.dim_cliente c ON c.sk_cliente = f.sk_cliente\r\n",
+        "JOIN ult_mes u ON f.dt_mes = u.dt_mes\r\n",
+        "GROUP BY faixa_tempo_conta\r\n",
+        "ORDER BY ead_total DESC;\r\n"
+      ]
+    },
+    {
+      "name": "d08bd239",
+      "displayName": "CP2",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  CASE\r\n",
+        "    WHEN c.tempo_emprego_anos < 1 THEN '<1 ano'\r\n",
+        "    WHEN c.tempo_emprego_anos BETWEEN 1 AND 3 THEN '1-3 anos'\r\n",
+        "    WHEN c.tempo_emprego_anos BETWEEN 4 AND 7 THEN '4-7 anos'\r\n",
+        "    WHEN c.tempo_emprego_anos BETWEEN 8 AND 15 THEN '8-15 anos'\r\n",
+        "    ELSE '15+ anos'\r\n",
+        "  END AS faixa_tempo_emprego,\r\n",
+        "  SUM(f.ead_soma) AS ead_total,\r\n",
+        "  SUM(f.pd_true_media * f.ead_soma) / NULLIF(SUM(f.ead_soma), 0) AS pd_true_pond\r\n",
+        "FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "JOIN puc.gold.dim_cliente c ON c.sk_cliente = f.sk_cliente\r\n",
+        "JOIN ult_mes u ON f.dt_mes = u.dt_mes\r\n",
+        "GROUP BY faixa_tempo_emprego\r\n",
+        "ORDER BY ead_total DESC;\r\n"
+      ]
+    },
+    {
+      "name": "4c5785f6",
+      "displayName": "CP3",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  c.setor,\r\n",
+        "  COUNT(DISTINCT c.sk_cliente) AS qtd_clientes,\r\n",
+        "  SUM(f.ead_soma) AS ead_total,\r\n",
+        "  SUM(f.pd_model_media * f.ead_soma) / NULLIF(SUM(f.ead_soma), 0) AS pd_model_pond,\r\n",
+        "  SUM(f.pd_true_media  * f.ead_soma) / NULLIF(SUM(f.ead_soma), 0) AS pd_true_pond\r\n",
+        "FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "JOIN puc.gold.dim_cliente c ON c.sk_cliente = f.sk_cliente\r\n",
+        "JOIN ult_mes u ON f.dt_mes = u.dt_mes\r\n",
+        "GROUP BY c.setor\r\n",
+        "ORDER BY pd_true_pond DESC;\r\n"
+      ]
+    },
+    {
+      "name": "0bca04f2",
+      "displayName": "CP4",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  c.escolaridade,\r\n",
+        "  COUNT(*) AS qtd_clientes,\r\n",
+        "  SUM(f.ead_soma) AS ead_total,\r\n",
+        "  SUM(f.pd_true_media * f.ead_soma) / NULLIF(SUM(f.ead_soma), 0) AS pd_true_pond,\r\n",
+        "  SUM(f.perda_esperada_soma) AS perda_esperada_total\r\n",
+        "FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "JOIN puc.gold.dim_cliente c ON c.sk_cliente = f.sk_cliente\r\n",
+        "JOIN ult_mes u ON f.dt_mes = u.dt_mes\r\n",
+        "GROUP BY c.escolaridade\r\n",
+        "ORDER BY ead_total DESC;\r\n"
+      ]
+    },
+    {
+      "name": "8042c675",
+      "displayName": "CP5",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        "),\r\n",
+        "base AS (\r\n",
+        "  SELECT\r\n",
+        "    c.idade,\r\n",
+        "    f.ead_soma,\r\n",
+        "    f.perda_esperada_soma,\r\n",
+        "    f.pd_model_media,\r\n",
+        "    f.pd_true_media\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "  JOIN puc.gold.dim_cliente c ON c.sk_cliente = f.sk_cliente\r\n",
+        "  JOIN ult_mes u ON f.dt_mes = u.dt_mes\r\n",
+        "),\r\n",
+        "faixas AS (\r\n",
+        "  SELECT\r\n",
+        "    CASE\r\n",
+        "      WHEN idade < 18 THEN '<18'\r\n",
+        "      WHEN idade BETWEEN 18 AND 25 THEN '18-25'\r\n",
+        "      WHEN idade BETWEEN 26 AND 35 THEN '26-35'\r\n",
+        "      WHEN idade BETWEEN 36 AND 45 THEN '36-45'\r\n",
+        "      WHEN idade BETWEEN 46 AND 55 THEN '46-55'\r\n",
+        "      WHEN idade BETWEEN 56 AND 65 THEN '56-65'\r\n",
+        "      ELSE '66+'\r\n",
+        "    END AS faixa_idade,\r\n",
+        "    *\r\n",
+        "  FROM base\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  faixa_idade,\r\n",
+        "  COUNT(*) AS qtd_registros,\r\n",
+        "  SUM(ead_soma) AS ead_total,\r\n",
+        "  SUM(perda_esperada_soma) AS perda_esperada_total,\r\n",
+        "  SUM(pd_model_media * ead_soma) / NULLIF(SUM(ead_soma), 0) AS pd_model_pond,\r\n",
+        "  SUM(pd_true_media  * ead_soma) / NULLIF(SUM(ead_soma), 0) AS pd_true_pond\r\n",
+        "FROM faixas\r\n",
+        "GROUP BY faixa_idade\r\n",
+        "ORDER BY ead_total DESC;\r\n"
+      ]
+    },
+    {
+      "name": "347cd587",
+      "displayName": "CP6",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT max(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  c.idade,\r\n",
+        "  AVG(f.inadimplencia_media) AS inadimplencia_media\r\n",
+        "FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "JOIN puc.gold.dim_cliente c ON c.sk_cliente = f.sk_cliente\r\n",
+        "JOIN ult_mes u ON f.dt_mes = u.dt_mes\r\n",
+        "GROUP BY c.idade\r\n",
+        "ORDER BY c.idade;\r\n"
+      ]
+    },
+    {
+      "name": "1dd85aa3",
+      "displayName": "CP7",
+      "queryLines": [
+        "WITH ult_mes AS (\r\n",
+        "  SELECT MAX(dt_mes) AS dt_mes\r\n",
+        "  FROM puc.gold.fato_risco_cliente_mes\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  c.escolaridade,\r\n",
+        "  COUNT(DISTINCT c.sk_cliente) AS qtd_clientes,\r\n",
+        "  SUM(f.ead_soma) AS ead_total,\r\n",
+        "  SUM(f.pd_model_media * f.ead_soma) / NULLIF(SUM(f.ead_soma), 0) AS pd_model_pond,\r\n",
+        "  SUM(f.pd_true_media  * f.ead_soma) / NULLIF(SUM(f.ead_soma), 0) AS pd_true_pond\r\n",
+        "FROM puc.gold.fato_risco_cliente_mes f\r\n",
+        "JOIN puc.gold.dim_cliente c\r\n",
+        "  ON c.sk_cliente = f.sk_cliente\r\n",
+        "JOIN ult_mes u\r\n",
+        "  ON f.dt_mes = u.dt_mes\r\n",
+        "GROUP BY c.escolaridade\r\n",
+        "ORDER BY pd_true_pond DESC;\r\n"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "5917a558",
+      "displayName": "Geografia",
+      "layout": [
+        {
+          "widget": {
+            "name": "c6526685",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4c79c440",
+                  "fields": [
+                    {
+                      "name": "sum(ead_total)",
+                      "expression": "SUM(`ead_total`)"
+                    },
+                    {
+                      "name": "uf",
+                      "expression": "`uf`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(ead_total)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "uf",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(ead_total)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "UFs com maior EAD (último mês)"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 2,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "d8904552",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d0a7471d",
+                  "fields": [
+                    {
+                      "name": "sum(ead_total)",
+                      "expression": "SUM(`ead_total`)"
+                    },
+                    {
+                      "name": "regiao",
+                      "expression": "`regiao`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(ead_total)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "regiao",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Regiões com maior EAD (último mês)"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 1,
+            "width": 2,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "d110601c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0ea0c38b",
+                  "fields": [
+                    {
+                      "name": "sum(perda_esperada_total)",
+                      "expression": "SUM(`perda_esperada_total`)"
+                    },
+                    {
+                      "name": "uf",
+                      "expression": "`uf`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(perda_esperada_total)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "uf",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "UFs com maior Perda Esperada no último mês"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 1,
+            "width": 2,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "c21d837b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6cef36a9",
+                  "fields": [
+                    {
+                      "name": "uf",
+                      "expression": "`uf`"
+                    },
+                    {
+                      "name": "valor_recuperado",
+                      "expression": "`valor_recuperado`"
+                    },
+                    {
+                      "name": "perda_esperada",
+                      "expression": "`perda_esperada`"
+                    },
+                    {
+                      "name": "taxa_recuperacao_proxy",
+                      "expression": "`taxa_recuperacao_proxy`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "uf",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100000,
+                    "title": "uf",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "valor_recuperado",
+                    "numberFormat": "R$ #,##.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100001,
+                    "title": "valor_recuperado",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "perda_esperada",
+                    "numberFormat": "R$ #,##.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100002,
+                    "title": "perda_esperada",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "taxa_recuperacao_proxy",
+                    "numberFormat": "0.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100003,
+                    "title": "taxa_recuperacao_proxy",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "showTitle": true,
+                "title": "Taxa de recuperação por UF (valor_recuperado / perda_esperada) no último mês"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 7,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "fe699303",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5ed47ebf",
+                  "fields": [
+                    {
+                      "name": "ead_total",
+                      "expression": "`ead_total`"
+                    },
+                    {
+                      "name": "monthly(dt_mes)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `dt_mes`)"
+                    },
+                    {
+                      "name": "uf",
+                      "expression": "`uf`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(dt_mes)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "uf",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "color": {
+                  "fieldName": "ead_total",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "custom-sequential",
+                      "colors": {
+                        "start": "#FFFFFF",
+                        "end": "#FF9700"
+                      }
+                    },
+                    "reverse": false
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Evolução mensal de EAD por UF (últimos 12 meses)"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "cdcb9aa2",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "36e50512",
+                  "fields": [
+                    {
+                      "name": "uf",
+                      "expression": "`uf`"
+                    },
+                    {
+                      "name": "ead_atual",
+                      "expression": "`ead_atual`"
+                    },
+                    {
+                      "name": "ead_anterior",
+                      "expression": "`ead_anterior`"
+                    },
+                    {
+                      "name": "delta_ead",
+                      "expression": "`delta_ead`"
+                    },
+                    {
+                      "name": "pct_var_ead",
+                      "expression": "`pct_var_ead`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "uf",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100000,
+                    "title": "uf",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "ead_atual",
+                    "numberFormat": "R$ #,##.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100001,
+                    "title": "ead_atual",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "ead_anterior",
+                    "numberFormat": "R$ #,##.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100002,
+                    "title": "ead_anterior",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "delta_ead",
+                    "numberFormat": "R$ #,##.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100003,
+                    "title": "delta_ead",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "cellFormat": {
+                      "default": {
+                        "foregroundColor": null
+                      },
+                      "rules": [
+                        {
+                          "if": {
+                            "column": "delta_ead",
+                            "fn": "<",
+                            "literal": "0"
+                          },
+                          "value": {
+                            "foregroundColor": {
+                              "themeColorType": "visualizationColors",
+                              "position": 3
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "column": "delta_ead",
+                            "fn": "=",
+                            "literal": "0"
+                          },
+                          "value": {
+                            "foregroundColor": null
+                          }
+                        },
+                        {
+                          "if": {
+                            "column": "delta_ead",
+                            "fn": ">",
+                            "literal": "0"
+                          },
+                          "value": {
+                            "foregroundColor": {
+                              "themeColorType": "visualizationColors",
+                              "position": 2
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "fieldName": "pct_var_ead",
+                    "numberFormat": "0.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100004,
+                    "title": "pct_var_ead",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "cellFormat": {
+                      "default": {
+                        "foregroundColor": null
+                      },
+                      "rules": [
+                        {
+                          "if": {
+                            "column": "pct_var_ead",
+                            "fn": "<",
+                            "literal": "0"
+                          },
+                          "value": {
+                            "foregroundColor": {
+                              "themeColorType": "visualizationColors",
+                              "position": 3
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "column": "pct_var_ead",
+                            "fn": "=",
+                            "literal": "0"
+                          },
+                          "value": {
+                            "foregroundColor": null
+                          }
+                        },
+                        {
+                          "if": {
+                            "column": "pct_var_ead",
+                            "fn": ">",
+                            "literal": "0"
+                          },
+                          "value": {
+                            "foregroundColor": {
+                              "themeColorType": "visualizationColors",
+                              "position": 2
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "showTitle": true,
+                "title": "Crescimento de EAD por UF (mês atual vs mês anterior)"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 13,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "6c0e3e0c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "69e7c95b",
+                  "fields": [
+                    {
+                      "name": "sum(pct_acumulado)",
+                      "expression": "SUM(`pct_acumulado`)"
+                    },
+                    {
+                      "name": "uf",
+                      "expression": "`uf`"
+                    },
+                    {
+                      "name": "sum(ead_total)",
+                      "expression": "SUM(`ead_total`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "uf",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(ead_total)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(pct_acumulado)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Pareto: quais UFs somam 80% do EAD (último mês)",
+                "showDescription": false
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "553ff0b0",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"text-align:center;display:block\"><span style=\"font-size: 24px;text-decoration: underline;\">Resultados das Análises Risco X Geografia</span></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 1
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "d1a6c5ba",
+      "displayName": "Global Filters",
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+    },
+    {
+      "name": "baa563ca",
+      "displayName": "Cliente",
+      "layout": [
+        {
+          "widget": {
+            "name": "98418fca",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"text-align:center;display:block\"><span style=\"font-size:24px;text-decoration:underline\">Resultados das Análises Risco X Cliente</span></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "9e75c0af",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "68c04c64",
+                  "fields": [
+                    {
+                      "name": "sum(ead_total)",
+                      "expression": "SUM(`ead_total`)"
+                    },
+                    {
+                      "name": "faixa_tempo_conta",
+                      "expression": "`faixa_tempo_conta`"
+                    },
+                    {
+                      "name": "pd_true_pond",
+                      "expression": "`pd_true_pond`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "faixa_tempo_conta",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "pd_true_pond",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(ead_total)",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "custom-sequential",
+                      "colors": {
+                        "start": "#EFF3FF",
+                        "end": "#FF7500"
+                      }
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Tempo de conta X Risco"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "b65c0924",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d08bd239",
+                  "fields": [
+                    {
+                      "name": "sum(ead_total)",
+                      "expression": "SUM(`ead_total`)"
+                    },
+                    {
+                      "name": "faixa_tempo_emprego",
+                      "expression": "`faixa_tempo_emprego`"
+                    },
+                    {
+                      "name": "pd_true_pond",
+                      "expression": "`pd_true_pond`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "faixa_tempo_emprego",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "pd_true_pond",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(ead_total)",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "custom-sequential",
+                      "colors": {
+                        "start": "#EFF3FF",
+                        "end": "#FF7500"
+                      }
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Tempo de emprego X Risco"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 1,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "7137bde0",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4c5785f6",
+                  "fields": [
+                    {
+                      "name": "sum(pd_model_pond)",
+                      "expression": "SUM(`pd_model_pond`)"
+                    },
+                    {
+                      "name": "sum(pd_true_pond)",
+                      "expression": "SUM(`pd_true_pond`)"
+                    },
+                    {
+                      "name": "setor",
+                      "expression": "`setor`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "sum(pd_model_pond)"
+                    },
+                    {
+                      "fieldName": "sum(pd_true_pond)"
+                    }
+                  ]
+                },
+                "y": {
+                  "fieldName": "setor",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "PD Modelo X PD Real por setor"
+              },
+              "mark": {
+                "layout": "group"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 2,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "3e77f3ed",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0bca04f2",
+                  "fields": [
+                    {
+                      "name": "sum(perda_esperada_total)",
+                      "expression": "SUM(`perda_esperada_total`)"
+                    },
+                    {
+                      "name": "escolaridade",
+                      "expression": "`escolaridade`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(perda_esperada_total)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "escolaridade",
+                  "legend": {
+                    "position": "right"
+                  },
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "angle-reversed"
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 7,
+            "width": 2,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "93468792",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8042c675",
+                  "fields": [
+                    {
+                      "name": "faixa_idade",
+                      "expression": "`faixa_idade`"
+                    },
+                    {
+                      "name": "sum(pd_model_pond)",
+                      "expression": "SUM(`pd_model_pond`)"
+                    },
+                    {
+                      "name": "sum(pd_true_pond)",
+                      "expression": "SUM(`pd_true_pond`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "faixa_idade",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "sum(pd_model_pond)"
+                    },
+                    {
+                      "fieldName": "sum(pd_true_pond)"
+                    }
+                  ]
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "mark": {
+                "layout": "group"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "a0c87e43",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "347cd587",
+                  "fields": [
+                    {
+                      "name": "idade",
+                      "expression": "`idade`"
+                    },
+                    {
+                      "name": "inadimplencia_media",
+                      "expression": "`inadimplencia_media`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "idade",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "inadimplencia_media",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 13,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "5469c4c9",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1dd85aa3",
+                  "fields": [
+                    {
+                      "name": "sum(pd_model_pond)",
+                      "expression": "SUM(`pd_model_pond`)"
+                    },
+                    {
+                      "name": "sum(pd_true_pond)",
+                      "expression": "SUM(`pd_true_pond`)"
+                    },
+                    {
+                      "name": "escolaridade",
+                      "expression": "`escolaridade`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "sum(pd_model_pond)"
+                    },
+                    {
+                      "fieldName": "sum(pd_true_pond)"
+                    }
+                  ]
+                },
+                "y": {
+                  "fieldName": "escolaridade",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "PD Modelo X PD Real por escolaridade"
+              },
+              "mark": {
+                "layout": "group"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 7,
+            "width": 2,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
