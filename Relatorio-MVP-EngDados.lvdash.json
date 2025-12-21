@@ -553,16 +553,16 @@
                       "expression": "`uf`"
                     },
                     {
+                      "name": "taxa_recuperacao_proxy",
+                      "expression": "`taxa_recuperacao_proxy`"
+                    },
+                    {
                       "name": "valor_recuperado",
                       "expression": "`valor_recuperado`"
                     },
                     {
                       "name": "perda_esperada",
                       "expression": "`perda_esperada`"
-                    },
-                    {
-                      "name": "taxa_recuperacao_proxy",
-                      "expression": "`taxa_recuperacao_proxy`"
                     }
                   ],
                   "disaggregated": true
@@ -591,10 +591,37 @@
                     "type": "string",
                     "displayAs": "string",
                     "visible": true,
-                    "order": 100000,
+                    "order": 0,
                     "title": "uf",
                     "allowSearch": false,
                     "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "taxa_recuperacao_proxy",
+                    "numberFormat": "0.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 1,
+                    "title": "taxa_recuperacao_proxy",
+                    "allowSearch": false,
+                    "alignContent": "right",
                     "allowHTML": false,
                     "highlightLinks": false,
                     "useMonospaceFont": false,
@@ -618,7 +645,7 @@
                     "type": "float",
                     "displayAs": "number",
                     "visible": true,
-                    "order": 100001,
+                    "order": 2,
                     "title": "valor_recuperado",
                     "allowSearch": false,
                     "alignContent": "right",
@@ -645,35 +672,8 @@
                     "type": "float",
                     "displayAs": "number",
                     "visible": true,
-                    "order": 100002,
+                    "order": 3,
                     "title": "perda_esperada",
-                    "allowSearch": false,
-                    "alignContent": "right",
-                    "allowHTML": false,
-                    "highlightLinks": false,
-                    "useMonospaceFont": false,
-                    "preserveWhitespace": false
-                  },
-                  {
-                    "fieldName": "taxa_recuperacao_proxy",
-                    "numberFormat": "0.00",
-                    "booleanValues": [
-                      "false",
-                      "true"
-                    ],
-                    "imageUrlTemplate": "{{ @ }}",
-                    "imageTitleTemplate": "{{ @ }}",
-                    "imageWidth": "",
-                    "imageHeight": "",
-                    "linkUrlTemplate": "{{ @ }}",
-                    "linkTextTemplate": "{{ @ }}",
-                    "linkTitleTemplate": "{{ @ }}",
-                    "linkOpenInNewTab": true,
-                    "type": "float",
-                    "displayAs": "number",
-                    "visible": true,
-                    "order": 100003,
-                    "title": "taxa_recuperacao_proxy",
                     "allowSearch": false,
                     "alignContent": "right",
                     "allowHTML": false,
@@ -789,16 +789,16 @@
                       "expression": "`uf`"
                     },
                     {
+                      "name": "delta_ead",
+                      "expression": "`delta_ead`"
+                    },
+                    {
                       "name": "ead_atual",
                       "expression": "`ead_atual`"
                     },
                     {
                       "name": "ead_anterior",
                       "expression": "`ead_anterior`"
-                    },
-                    {
-                      "name": "delta_ead",
-                      "expression": "`delta_ead`"
                     },
                     {
                       "name": "pct_var_ead",
@@ -831,64 +831,10 @@
                     "type": "string",
                     "displayAs": "string",
                     "visible": true,
-                    "order": 100000,
+                    "order": 0,
                     "title": "uf",
                     "allowSearch": false,
                     "alignContent": "left",
-                    "allowHTML": false,
-                    "highlightLinks": false,
-                    "useMonospaceFont": false,
-                    "preserveWhitespace": false
-                  },
-                  {
-                    "fieldName": "ead_atual",
-                    "numberFormat": "R$ #,##.00",
-                    "booleanValues": [
-                      "false",
-                      "true"
-                    ],
-                    "imageUrlTemplate": "{{ @ }}",
-                    "imageTitleTemplate": "{{ @ }}",
-                    "imageWidth": "",
-                    "imageHeight": "",
-                    "linkUrlTemplate": "{{ @ }}",
-                    "linkTextTemplate": "{{ @ }}",
-                    "linkTitleTemplate": "{{ @ }}",
-                    "linkOpenInNewTab": true,
-                    "type": "float",
-                    "displayAs": "number",
-                    "visible": true,
-                    "order": 100001,
-                    "title": "ead_atual",
-                    "allowSearch": false,
-                    "alignContent": "right",
-                    "allowHTML": false,
-                    "highlightLinks": false,
-                    "useMonospaceFont": false,
-                    "preserveWhitespace": false
-                  },
-                  {
-                    "fieldName": "ead_anterior",
-                    "numberFormat": "R$ #,##.00",
-                    "booleanValues": [
-                      "false",
-                      "true"
-                    ],
-                    "imageUrlTemplate": "{{ @ }}",
-                    "imageTitleTemplate": "{{ @ }}",
-                    "imageWidth": "",
-                    "imageHeight": "",
-                    "linkUrlTemplate": "{{ @ }}",
-                    "linkTextTemplate": "{{ @ }}",
-                    "linkTitleTemplate": "{{ @ }}",
-                    "linkOpenInNewTab": true,
-                    "type": "float",
-                    "displayAs": "number",
-                    "visible": true,
-                    "order": 100002,
-                    "title": "ead_anterior",
-                    "allowSearch": false,
-                    "alignContent": "right",
                     "allowHTML": false,
                     "highlightLinks": false,
                     "useMonospaceFont": false,
@@ -912,7 +858,7 @@
                     "type": "float",
                     "displayAs": "number",
                     "visible": true,
-                    "order": 100003,
+                    "order": 1,
                     "title": "delta_ead",
                     "allowSearch": false,
                     "alignContent": "right",
@@ -965,6 +911,60 @@
                     }
                   },
                   {
+                    "fieldName": "ead_atual",
+                    "numberFormat": "R$ #,##.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 2,
+                    "title": "ead_atual",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "ead_anterior",
+                    "numberFormat": "R$ #,##.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 3,
+                    "title": "ead_anterior",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
                     "fieldName": "pct_var_ead",
                     "numberFormat": "0.00",
                     "booleanValues": [
@@ -982,7 +982,7 @@
                     "type": "float",
                     "displayAs": "number",
                     "visible": true,
-                    "order": 100004,
+                    "order": 4,
                     "title": "pct_var_ead",
                     "allowSearch": false,
                     "alignContent": "right",
@@ -1109,7 +1109,7 @@
               },
               "frame": {
                 "showTitle": true,
-                "title": "Pareto: quais UFs somam 80% do EAD (último mês)",
+                "title": "Quais UFs somam 80% do EAD (último mês)",
                 "showDescription": false
               }
             }
@@ -1469,6 +1469,10 @@
                 "label": {
                   "show": true
                 }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Risco por escolaridade"
               }
             }
           },
@@ -1532,6 +1536,10 @@
                   "show": true
                 }
               },
+              "frame": {
+                "showTitle": true,
+                "title": "PD Modelo X PD Real por faixa etária"
+              },
               "mark": {
                 "layout": "group"
               }
@@ -1582,6 +1590,10 @@
                     "type": "quantitative"
                   }
                 }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Inadimplência média por idade"
               },
               "mark": {
                 "colors": [
