@@ -39,7 +39,7 @@ As análises de Geografia permitem identificar concentrações regionais de risc
 
 ### Processo
 
-O processo de ETL paraa criação do Data Mart foi desenvolvido em 4 etapas:
+O processo de ETL para criação do Data Mart foi desenvolvido em 4 etapas:
 
 ![Fluxograma](imagens/fluxograma.png)
 
