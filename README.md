@@ -2,7 +2,7 @@
 
 ## Introdução ao projeto
 
-O projeto consiste na aplicação dos conceitos de engenharia de dados na elaboração de um ambiente analitico para a área de risco de crédito. 
+O projeto consiste na aplicação dos conceitos de engenharia de dados na elaboração de um ambiente analitico (Data Mart) para a área de risco de crédito. 
 
 ## Contextualizando
 O Risco de Crédito está relacionado à possibilidade de um cliente não cumprir suas obrigações financeiras, como atrasar ou deixar de pagar um empréstimo. Para lidar com esse risco, instituições financeiras utilizam modelos analíticos que estimam indicadores como a Probabilidade de Default (PD), a Exposição ao Default (EAD) e a Perda Esperada (PE), permitindo avaliar o risco tanto de clientes individuais quanto da carteira como um todo.
@@ -33,89 +33,25 @@ As análises de Geografia permitem identificar concentrações regionais de risc
 
 ## Sobre o projeto
 
+### Catálogo gerado
+
+![Catalogo](imagens/catalogo.png)
+
 ### Processo
 
 O processo de ETL paraa criação do Data Mart foi desenvolvido em 4 etapas:
 
-- Etapa 1 - Ingestão de dados:
+![Fluxograma](imagens/fluxograma.png)
 
-Esta é a mais simples de todas, é nessa em que os dados são extraídos da sua fonte, que é o google drive, e apenas processado para virar uma tabela no catalogo do databricks, sem processamento nenhum.
+#### Etapa 1 - Ingestão de dados:
 
-- Etapa 2 - Higienização e adequação no schema:
+* Criação da Camada Bronze
 
-Aqui é a etapa em que a tabela criada previamente na camada bronze recebe tratamentos e validações para garantir que os dados fiquem padronizados de acordo com as regras de domínio, formatos e negócio.
+Esta é a etapa mais simples do pipeline, na qual os dados são extraídos diretamente de sua fonte de origem, o Google Drive, e carregados no Databricks apenas para conversão em tabela no catálogo. Nessa fase, não é realizado nenhum tipo de processamento ou transformação nos dados, servindo exclusivamente como etapa de ingestão.
 
-- Etapa 3 - Criação do esquema estrela:
+A base utilizada é composta por dados gerados artificialmente, com o objetivo de simular um cenário de risco de crédito voltado ao monitoramento de modelos de risco. O conjunto de dados possui aproximadamente 1 milhão de registros e inclui informações com datas projetadas para o futuro, característica que foi devidamente considerada durante a etapa de validação e higienização dos dados, garantindo consistência e aderência ao contexto do problema analisado.
 
-Por fim, é aqui que o Data Mart é criado, a partir da tabela da camada silver são criadas as dimensões e fatos. As dimensões são: dim_tempo, dim_localizacao, dim_cliente, dim_produto e dim_canal. As fatos são: fato_risco_cliente_mes e fato_solicitacao_credito. O esquema estrela gerado e suas variáveis e tipos pode ser vistas na imagem a seguir. 
-
-![Star Schema](star_schema_mvp_engdados_puc.png)
-
-- Etapa 4 - Analises
-
-Etapa em que o Data Mart está preparado para ser utilizado a fim de responder as perguntas elaboradas.
-
-## Data Domains & Validation Rules
-
-Este documento descreve os **domínios permitidos**, **intervalos válidos** e **regras básicas de qualidade de dados**
-para as colunas do dataset de crédito.
-
-Essas regras servem como:
-- Contrato de dados (Data Contract)
-- Base para validações automáticas
-- Referência de negócio e auditoria
-
----
-
-### Domínios e Intervalos Permitidos das Colunas
-
-#### Convenções
-- `+∞` = sem limite superior  
-- `today` = data atual  
-- Booleanos aceitam `{true, false}` (ou `{0,1}`, conforme padrão do dataset)
-
----
-
-| Coluna | Tipo | Domínio / Intervalo Permitido | Aceita Nulo |
-|------|------|-------------------------------|-------------|
-| `uf` | set | `ac, al, ap, am, ba, ce, df, es, go, ma, mt, ms, mg, pa, pb, pr, pe, pi, rj, rn, rs, ro, rr, sc, sp, se, to` | Não |
-| `regiao` | set | `norte, nordeste, centro-oeste, sudeste, sul` | Não |
-| `canal` | set | `app, internet banking, agencia, correspondente` | Não |
-| `produto` | set | `consignado, veiculo, pessoal, home_equity, cartao` | Sim |
-| `escolaridade` | set | `medio, fundamental, pos, superior` | Não |
-| `estado_civil` | set | `solteiro, divorciado, casado, viuvo` | Não |
-| `vinculo_emprego` | set | `clt, autonomo, servidor, desempregado, empresario, estudante` | Não |
-| `setor` | set | `educacao, saude, comercio, industria, ti, construcao, servicos, outro` | Não |
-| `usa_internet_banking` | boolean | `true, false` | Não |
-| `possui_cartao_credito` | boolean | `true, false` | Não |
-| `possui_investimentos` | boolean | `true, false` | Não |
-| `possui_seguro` | boolean | `true, false` | Não |
-| `inadimplente` | set | `0, 1` | Não |
-| `data_solicitacao` | date_range | `1900-01-01` até `today` | Não |
-| `idade` | range | `0` a `120` | Não |
-| `tempo_conta_anos` | range | `0` a `+∞` | Não |
-| `tempo_emprego_anos` | range | `0` a `+∞` | Sim |
-| `qtd_produtos_bancarios` | range_int | inteiros `0` a `+∞` | Não |
-| `renda_mensal_atual` | range | `0` a `+∞` | Sim |
-| `renda_mensal_anterior` | range | `0` a `+∞` | Sim |
-| `atrasos_passados` | range_int | inteiros `0` a `+∞` | Não |
-| `score_credito` | range | `0` a `1000` | Não |
-| `parcelas` | range_int | inteiros `1` a `+∞` | Não |
-| `valor_emprestimo` | range | `0` a `+∞` | Não |
-| `taxa_juros_mensal` | range | `0` a `+∞` | Não |
-| `valor_parcela` | range | `0` a `+∞` | Não |
-| `dti` | range | `0` a `+∞` | Não |
-| `frequencia_transacoes` | range | `0` a `+∞` | Não |
-| `valor_emprestimos_anteriores` | range | `0` a `+∞` | Sim |
-| `pd_true` | range | `0` a `1` | Não |
-| `pd_model` | range | `0` a `1` | Não |
-| `lgd` | range | `0` a `1` | Não |
-| `ead` | range | `0` a `+∞` | Não |
-| `valor_recuperado` | range | `0` a `+∞` | Não |
-
----
-
-## Dicionário das variáveis
+##### Dicionário das variáveis
 
 | Variável                       | Descrição                                               |
 | ------------------------------ | ------------------------------------------------------- |
@@ -155,17 +91,119 @@ Essas regras servem como:
 | `valor_recuperado`             | Valor recuperado após inadimplência                     |
 | `pd_model`                     | Probabilidade de inadimplência estimada por modelo      |
 
-## Qualidade dos dados
+#### Etapa 2 - Higienização e adequação no schema:
 
-A análise de qualidade dos dados foi realizada na Etapa 2 – Higienização e Adequação no Schema, com foco em garantir consistência e confiabilidade para as análises de risco de crédito.
+* Criação da Camada Silver
 
-Foi feita uma avaliação atributo a atributo para identificar valores ausentes, outliers, inconsistências de domínio e tipos de dados inadequados. Variáveis com valores ausentes foram tratadas de forma controlada, preservando a coerência das análises, enquanto outliers plausíveis foram mantidos para não distorcer o perfil real da carteira.
+Nesta etapa, a tabela previamente criada na camada Bronze passa por tratamentos e validações com o objetivo de garantir que os dados estejam padronizados de acordo com regras de domínio, formatos e negócio, preparando-os para uso analítico nas camadas seguintes.
 
-As variáveis categóricas passaram por padronização de valores e validação de domínio, assegurando consistência entre categorias como UF, região, canal e produto. Também houve adequação dos tipos de dados para evitar problemas em cálculos e agregações.
+Resumo das regras e padronizações:
+        
+1 - Padronização de Tipos e Formatos: Nesta parte, os dados tiveram seus tipos explicitamente convertidos para formatos adequados ao uso analítico, com especial atenção a campos de data, numéricos e textuais. Datas foram normalizadas para tipos temporais corretos, valores numéricos ajustados para tipos compatíveis e campos textuais padronizados (minúsculas e remoção de inconsistências), garantindo consistência em filtros, agregações e junções futuras.
+
+2 - Validação de Domínios Fechados: Foram aplicadas validações baseadas em domínios fechados definidos no catálogo de dados, como Unidades Federativas e regiões do Brasil. A região foi derivada diretamente da UF, assegurando coerência geográfica. Campos categóricos relevantes passaram por padronização e validação contra conjuntos permitidos, reduzindo ambiguidades e problemas de cardinalidade.
+
+3 - Regras de Consistência entre Atributos: Validações cruzadas foram implementadas para garantir coerência entre atributos relacionados. A idade do cliente foi restringida a intervalos plausíveis, o tempo de relacionamento validado para evitar valores negativos e as datas verificadas para respeitar a ordem temporal esperada. Essas regras asseguram a representatividade realista dos registros do ponto de vista de negócio.
+
+4 - Tratamento de Valores Nulos e Ausentes: Os valores nulos foram analisados atributo a atributo, com definição de estratégias específicas conforme a criticidade de cada campo. Campos essenciais tiveram tratamento mais restritivo, enquanto atributos secundários puderam receber valores padrão ou categorização explícita. O objetivo foi preservar informação relevante sem comprometer a qualidade analítica.
+
+5 - Validação de Valores Numéricos: Foram aplicadas regras para garantir que valores numéricos respeitassem limites mínimos e máximos esperados, como a não negatividade de valores monetários. Valores claramente inconsistentes com o domínio do problema foram tratados para evitar distorções em métricas agregadas, como saldo devedor, EAD e perda esperada.
+
+6 - Controle de Duplicidade e Integridade: A duplicidade de registros foi tratada a partir da identificação de chaves naturais e da criação de chaves degeneradas baseadas em hash. Essa abordagem permitiu representar eventos únicos de forma consistente, garantindo rastreabilidade, integridade dos dados e evitando contagens duplicadas nas análises posteriores.
+
+7 - Preparação para Modelagem Analítica: Os dados foram adequados para uso analítico, com garantia de granularidade consistente e separação clara entre atributos dimensionais e métricas quantitativas. Essa preparação alinhou a camada Silver ao modelo dimensional adotado, facilitando a criação do esquema estrela e a construção da camada Gold.
+
+##### Domínios e Intervalos Permitidos das Colunas
+
+Abaixo está a tabela contendo os domínios de cada variável, os quais foram aplicados na etapa de validação de dados.
+###### Legenda:
+* `+∞` = sem limite superior  
+* `today` = data atual  
+* Booleanos aceitam `{true, false}` (ou `{0,1}`, conforme padrão do dataset)
+
+| Coluna | Tipo | Domínio / Intervalo Permitido | Aceita Nulo |
+|------|------|-------------------------------|-------------|
+| `uf` | set | `ac, al, ap, am, ba, ce, df, es, go, ma, mt, ms, mg, pa, pb, pr, pe, pi, rj, rn, rs, ro, rr, sc, sp, se, to` | Não |
+| `regiao` | set | `norte, nordeste, centro-oeste, sudeste, sul` | Não |
+| `canal` | set | `app, internet banking, agencia, correspondente` | Não |
+| `produto` | set | `consignado, veiculo, pessoal, home_equity, cartao` | Sim |
+| `escolaridade` | set | `medio, fundamental, pos, superior` | Não |
+| `estado_civil` | set | `solteiro, divorciado, casado, viuvo` | Não |
+| `vinculo_emprego` | set | `clt, autonomo, servidor, desempregado, empresario, estudante` | Não |
+| `setor` | set | `educacao, saude, comercio, industria, ti, construcao, servicos, outro` | Não |
+| `usa_internet_banking` | boolean | `true, false` | Não |
+| `possui_cartao_credito` | boolean | `true, false` | Não |
+| `possui_investimentos` | boolean | `true, false` | Não |
+| `possui_seguro` | boolean | `true, false` | Não |
+| `inadimplente` | set | `0, 1` | Não |
+| `data_solicitacao` | date_range | `1900-01-01` até `today` | Não |
+| `idade` | range | `0` a `120` | Não |
+| `tempo_conta_anos` | range | `0` a `+∞` | Não |
+| `tempo_emprego_anos` | range | `0` a `+∞` | Sim |
+| `qtd_produtos_bancarios` | range_int | inteiros `0` a `+∞` | Não |
+| `renda_mensal_atual` | range | `0` a `+∞` | Sim |
+| `renda_mensal_anterior` | range | `0` a `+∞` | Sim |
+| `atrasos_passados` | range_int | inteiros `0` a `+∞` | Não |
+| `score_credito` | range | `0` a `1000` | Não |
+| `parcelas` | range_int | inteiros `1` a `+∞` | Não |
+| `valor_emprestimo` | range | `0` a `+∞` | Não |
+| `taxa_juros_mensal` | range | `0` a `+∞` | Não |
+| `valor_parcela` | range | `0` a `+∞` | Não |
+| `dti` | range | `0` a `+∞` | Não |
+| `frequencia_transacoes` | range | `0` a `+∞` | Não |
+| `valor_emprestimos_anteriores` | range | `0` a `+∞` | Sim |
+| `pd_true` | range | `0` a `1` | Não |
+| `pd_model` | range | `0` a `1` | Não |
+| `lgd` | range | `0` a `1` | Não |
+| `ead` | range | `0` a `+∞` | Não |
+| `valor_recuperado` | range | `0` a `+∞` | Não |
+
+#### Etapa 3 - Criação do esquema estrela:
+
+* Criação da Camada Gold
+
+Por fim, nesta etapa é realizada a criação do Data Mart. A partir da tabela da camada Silver, são construídas as tabelas dimensionais e as tabelas fato. As dimensões criadas são dim_tempo, dim_localizacao, dim_cliente, dim_produto e dim_canal, enquanto as tabelas fato são fato_risco_cliente_mes e fato_solicitacao_credito. O esquema estrela resultante, bem como as variáveis e seus respectivos tipos de dados, pode ser visualizado na imagem a seguir.
+
+![Star Schema](star_schema_mvp_engdados_puc.png)
+
+1 -  Dimensão Tempo:
+
+* A dimensão tempo foi criada a partir da data de solicitação, com derivação de atributos como ano, trimestre e mês para análises temporais.
+
+2 -  Dimensão Localização:
+
+* A dimensão localização consolidou UF e região, com a região derivada diretamente da UF para garantir padronização geográfica.
+
+3 - Dimensão Cliente:
+
+* A dimensão cliente reuniu atributos demográficos e socioeconômicos, sendo identificada por chave substituta para evitar duplicidades.
+
+4 - Dimensão Produto e Canal:
+
+* Produto e canal foram modelados como dimensões independentes, seguindo o padrão.
+
+5 - Chaves Substitutas (Surrogate Keys - sk's):
+
+* Foram geradas chaves substitutas para todas as dimensões, assegurando integridade referencial e independência das chaves naturais.
+
+6 - Chaves Degeneradas:
+
+* Identificadores do próprio evento foram mantidos na tabela fato como chaves degeneradas, preservando rastreabilidade sem aumentar a complexidade do modelo.
+
+#### Etapa 4 - Analises
+
+* Criação das Análises utilizando a Camada Gold
+
+Etapa em que o Data Mart está preparado para ser utilizado a fim de responder as perguntas elaboradas.
 
 ## Respondendo as perguntas
 
+As consultas referentes às perguntas definidas encontram-se no notebook “Etapa 4 – Análises”. As perguntas foram organizadas em duas visões distintas: uma com foco na relação entre risco e a distribuição geográfica (Geografia) e outra com foco na relação entre risco e o perfil do cliente (Cliente). Para fins de identificação, adotou-se a nomenclatura GP para perguntas de Geografia (por exemplo, GP1 – Geografia Pergunta 1) e CP para perguntas relacionadas ao Cliente (por exemplo, CP7 – Cliente Pergunta 7).
+
+O relatório analítico (dashboard) pode ser visualizado no arquivo “Relatorio-MVP-EngDados.lvdash.json”.
+
 ### Geografia:
+
 - GP1 - Quais UFs com maior EAD (último mês)?
 
 ![Resposta GP1](imagens/gp1.png)
@@ -195,6 +233,7 @@ As variáveis categóricas passaram por padronização de valores e validação 
 ![Resposta GP9](imagens/gp9.png)
 
 ### Clientes:
+
 - CP1 - Qual a relação entre tempo de conta e risco?
 
 ![Resposta CP1](imagens/cp1.png)
@@ -223,3 +262,12 @@ As variáveis categóricas passaram por padronização de valores e validação 
 
 ![Resposta CP6](imagens/cp6.png)
 
+## Auto-avaliação
+
+O projeto teve como objetivo facilitar a análise e exploração dos dados por meio de uma modelagem adequada. Considera-se que esse objetivo foi alcançado, uma vez que o ambiente construído permite a execução de consultas em diferentes níveis de granularidade, além da possibilidade de relacionar múltiplas tabelas fato de forma simples através das dimensões, para a geração de novas análises e insights sobre o negócio.
+
+A adoção de um modelo dimensional em esquema estrela mostrou-se especialmente vantajosa para o uso por equipes de análise, pois torna mais clara a relação entre os dados e reduz a complexidade de entendimento do ambiente analítico. Em comparação, uma abordagem baseada exclusivamente em tabelas flat, com grande volume de dados repetidos, limitaria significativamente a interpretação das informações e aumentaria o esforço necessário para análise.
+
+Outro aspecto relevante identificado ao longo do desenvolvimento foi o impacto positivo no desempenho das consultas. A estrutura do esquema estrela minimiza a duplicação de dados por meio da separação entre fatos e dimensões, o que contribui para consultas mais eficientes e melhor organização do modelo analítico como um todo.
+
+Por fim, destaca-se a facilidade na construção de consultas para responder perguntas relevantes do negócio. A modelagem adotada permitiu que todas as perguntas definidas no escopo do projeto fossem respondidas de forma objetiva, além de possibilitar sua conversão direta em gráficos e cálculos adequados para análises visuais e apresentações corporativas.
