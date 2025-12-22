@@ -47,7 +47,9 @@ Aqui é a etapa em que a tabela criada previamente na camada bronze recebe trata
 
 - Etapa 3 - Criação do esquema estrela:
 
-Por fim, é aqui que o Data Mart é criado, a partir da tabela da camada silver são criadas as dimensões e fatos. As dimensões são: dim_tempo, dim_localizacao, dim_cliente, dim_produto e dim_canal. As fatos são: fato_risco_cliente_mes e fato_solicitacao_credito. O esquema estrela gerado e suas variáveis e tipos pode ser vistas no arquivo star_schema_mvp_engdados_puc.png
+Por fim, é aqui que o Data Mart é criado, a partir da tabela da camada silver são criadas as dimensões e fatos. As dimensões são: dim_tempo, dim_localizacao, dim_cliente, dim_produto e dim_canal. As fatos são: fato_risco_cliente_mes e fato_solicitacao_credito. O esquema estrela gerado e suas variáveis e tipos pode ser vistas na imagem a seguir. 
+
+![Star Schema](star_schema_mvp_engdados_puc.png)
 
 - Etapa 4 - Analises
 
@@ -164,20 +166,60 @@ As variáveis categóricas passaram por padronização de valores e validação 
 ## Respondendo as perguntas
 
 ### Geografia:
-- P1 - Quais UFs com maior EAD (último mês)?
-- P2 - Quais Regiões com maior EAD (último mês)?
-- P6 - Quais UFs com maior Perda Esperada no último mês?
-- P10 - Quais UFs somam 80% do EAD (último mês)?
-- P7 - Qual a taxa de recuperação por UF (valor_recuperado / perda_esperada) no último mês?
-- P8 - Qual a evolução mensal de EAD por UF (últimos 12 meses)?
-- P9 - Qual o crescimento de EAD por UF (mês atual vs mês anterior)?
+- GP1 - Quais UFs com maior EAD (último mês)?
+
+![Resposta GP1](imagens/gp1.png)
+
+- GP2 - Quais Regiões com maior EAD (último mês)?
+
+![Resposta GP2](imagens/gp2.png)
+
+- GP6 - Quais UFs com maior Perda Esperada no último mês?
+
+![Resposta GP6](imagens/gp6.png)
+
+- GP10 - Quais UFs somam 80% do EAD (último mês)?
+
+![Resposta GP10](imagens/gp10.png)
+
+- GP7 - Qual a taxa de recuperação por UF (valor_recuperado / perda_esperada) no último mês?
+
+![Resposta GP7](imagens/gp7.png)
+
+- GP8 - Qual a evolução mensal de EAD por UF (últimos 12 meses)?
+
+![Resposta GP8](imagens/gp8.png)
+
+- GP9 - Qual o crescimento de EAD por UF (mês atual vs mês anterior)?
+
+![Resposta GP9](imagens/gp9.png)
 
 ### Clientes:
-- P1 - Qual a relação entre tempo de conta e risco?
-- P2 - Qual a relação entre tempo de emprego e risco?
-- P3 - A PD Modelo e PD Real por setor estão muito diferentes?
-- P7 - A PD Modelo e PD Real por escolaridade estão muito diferentes?
-- P4 - Qual o risco (Perda Esperada) por escolaridade?
-- P5 - A PD Modelo e PD Real por faixa etária estão muito diferentes?
-- P6 - Qual a inadimplência média por idade?
+- CP1 - Qual a relação entre tempo de conta e risco?
+
+![Resposta CP1](imagens/cp1.png)
+
+- CP2 - Qual a relação entre tempo de emprego e risco?
+
+![Resposta CP2](imagens/cp2.png)
+
+- CP3 - A PD Modelo e PD Real por setor estão muito diferentes?
+
+![Resposta CP3](imagens/cp3.png)
+
+- CP7 - A PD Modelo e PD Real por escolaridade estão muito diferentes?
+
+![Resposta CP7](imagens/cp7.png)
+
+- CP4 - Qual o risco (Perda Esperada) por escolaridade?
+
+![Resposta CP4](imagens/cp4.png)
+
+- CP5 - A PD Modelo e PD Real por faixa etária estão muito diferentes?
+
+![Resposta CP5](imagens/cp5.png)
+
+- CP6 - Qual a inadimplência média por idade?
+
+![Resposta CP6](imagens/cp6.png)
 
